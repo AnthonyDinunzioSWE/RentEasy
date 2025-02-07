@@ -269,7 +269,7 @@ def upload_signature(user_id):
 
     return jsonify({'message': 'Signature uploaded successfully', 'file_path': file_path}), 200
 
-def generate_lease(lease_id, tenant_signature_path=None):
+def generate_lease(lease_id, tenant_signature_path=None, landlord_signature_path=None):
     lease = LeaseAgreement.query.get_or_404(lease_id)
     landlord = User.query.get(lease.landlord_id)
     lease_folder = os.path.join(current_app.root_path, "leases")
@@ -324,7 +324,17 @@ def generate_lease(lease_id, tenant_signature_path=None):
     content.append(Spacer(1, 0.5 * inch))
     content.append(Paragraph("<b>Signatures:</b>", styles["Normal"]))
     content.append(Spacer(1, 0.2 * inch))
-    content.append(Paragraph("Landlord Signature: ___________________________", styles["Normal"]))
+    if landlord_signature_path:
+        landlord_signature_path = os.path.join(uploads_folder, landlord_signature_path)
+        print(f"LL Sig: ", landlord_signature_path)
+        # Add the tenant signature image
+        content.append(Paragraph("Tenant Signature:"))
+        landlord_signature = Image(landlord_signature_path, width=200, height=50)
+        print(f"LL", landlord_signature)
+        landlord_signature.hAlign = 'CENTER'  # Adjust alignment if necessary
+        content.append(landlord_signature)
+    else:
+        content.append(Paragraph("Tenant Signature: ___________________________", styles["Normal"]))
     content.append(Spacer(1, 0.2 * inch))
 
     if tenant_signature_path and os.path.exists(tenant_signature_path):

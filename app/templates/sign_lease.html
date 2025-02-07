@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Signature Canvas Section -->
+<div class="my-6">
+    <h2 class="text-xl font-semibold text-white mb-4">Sign Lease</h2>
+    <div class="bg-white p-4 rounded-lg shadow-lg">
+        <canvas id="signatureCanvas" width="500" height="300" style="border: 1px solid #ccc; background-color: white;"></canvas>
+        <div class="flex justify-between mt-4">
+            <button id="clearSignature" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg">Clear</button>
+            
+            <!-- Signature Save Form -->
+            <form id="saveSignatureForm" action="{{ url_for('main.sign_lease', lease_id=lease.id) }}" method="POST">
+                <!-- Hidden field to store the signature data -->
+                <input type="hidden" id="signatureData" name="signatureData">
+                <button type="submit" id="saveSignature" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg">Save</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/2.3.2/signature_pad.min.js"></script>
+<script>
+    // Initialize the signature canvas
+    const canvas = document.getElementById("signatureCanvas");
+    const context = canvas.getContext("2d");
+
+    let drawing = false;
+
+    // Start drawing
+    canvas.addEventListener("mousedown", (e) => {
+        drawing = true;
+        context.moveTo(e.offsetX, e.offsetY);
+        context.beginPath();
+    });
+
+    // Draw on the canvas
+    canvas.addEventListener("mousemove", (e) => {
+        if (drawing) {
+            context.lineTo(e.offsetX, e.offsetY);
+            context.stroke();
+        }
+    });
+
+    // Stop drawing
+    canvas.addEventListener("mouseup", () => {
+        drawing = false;
+    });
+
+    // Clear the canvas
+    document.getElementById("clearSignature").addEventListener("click", () => {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    // Save the signature when the Save button is clicked
+    document.getElementById("saveSignature").addEventListener("click", (e) => {
+        const dataUrl = canvas.toDataURL("image/png");
+
+        // Set the signature data in the hidden input field
+        document.getElementById("signatureData").value = dataUrl;
+    });
+</script>
+{% endblock %}

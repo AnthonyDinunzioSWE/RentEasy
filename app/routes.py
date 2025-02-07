@@ -1,15 +1,19 @@
 from io import BytesIO
 import os
-from flask import Blueprint, jsonify, render_template, redirect, url_for, request, session, flash, send_file
+from flask import Blueprint, current_app, jsonify, render_template, redirect, url_for, request, session, flash, send_file
 from .models import db, User, Tenant, Property, Payment, Invoice, LeaseAgreement
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from PIL import *
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
+from werkzeug.utils import secure_filename
+import base64
+
 
 
 main = Blueprint('main', __name__)
@@ -359,15 +363,19 @@ def check_lease(tenant_id):
     return jsonify({"status": "no_lease"})
 
 @main.route('/generate_lease/<int:lease_id>')
-def generate_lease(lease_id):
+def generate_lease(lease_id, landlord_signature_path=None, tenant_signature_path=None):
     lease = LeaseAgreement.query.get_or_404(lease_id)
+    print('LEASE', lease)
     landlord = User.query.get(lease.landlord_id)
-
-    lease_folder = os.path.join(os.getcwd(), "app", "leases")
+    lease_folder = os.path.join(current_app.root_path, "leases")
     if not os.path.exists(lease_folder):
         os.makedirs(lease_folder)
 
     file_path = os.path.join(lease_folder, f"lease_{lease_id}.pdf")
+    uploads_folder = os.path.join(current_app.root_path, 'uploads')
+
+    print(f"Uploads Folder {uploads_folder}")
+
 
     # Create a PDF Document
     pdf = SimpleDocTemplate(file_path, pagesize=letter)
@@ -384,6 +392,12 @@ def generate_lease(lease_id):
     property_info = f"<b>Property:</b> {lease.property_name} <br/> <b>Address:</b> {lease.property_name}"
     lease_terms = f"<b>Lease Start:</b> {lease.lease_start} <br/> <b>Lease End:</b> {lease.lease_end}"
 
+    landlord_signature_path = os.path.join(lease_folder, lease.landlord_signature_path)
+    tenant_signature_path = os.path.join(lease_folder, lease.tenant_signature_path)
+
+    print(f'Landlord sig: {landlord_signature_path}')
+    print(f'tenant sig: {tenant_signature_path}')
+
     content.append(Paragraph(landlord_info, styles["Normal"]))
     content.append(Paragraph(property_info, styles["Normal"]))
     content.append(Paragraph(lease_terms, styles["Normal"]))
@@ -395,7 +409,7 @@ def generate_lease(lease_id):
         ["Monthly Rent", f"${lease.rent}"]
     ]
     table = Table(rent_data, colWidths=[250, 150])
-    table.setStyle(TableStyle([
+    table.setStyle(TableStyle([ 
         ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
@@ -411,22 +425,89 @@ def generate_lease(lease_id):
     """
     content.append(Paragraph(lease_terms_text, styles["Normal"]))
 
-    # Signatures
+    # Signatures section
     content.append(Spacer(1, 0.5 * inch))
     content.append(Paragraph("<b>Signatures:</b>", styles["Normal"]))
     content.append(Spacer(1, 0.2 * inch))
-    content.append(Paragraph("Landlord Signature: ___________________________", styles["Normal"]))
-    content.append(Spacer(1, 0.2 * inch))
-    content.append(Paragraph("Tenant Signature: ___________________________", styles["Normal"]))
+    
+    if landlord_signature_path and os.path.exists(landlord_signature_path):
+        landlord_signature = Image(landlord_signature_path, width=200, height=50)
+        landlord_signature.hAlign = 'CENTER'
+        content.append(Paragraph("Landlord Signature:"))
+        content.append(landlord_signature)
+    else:
+        content.append(Paragraph("Landlord Signature: Image not available.", styles["Normal"]))
+    if tenant_signature_path:
+        print(f"PREV TENANT_SIG_PATH: {tenant_signature_path}")
+        # Ensure the tenant signature image exists
+        tenant_signature_path = os.path.join(uploads_folder, tenant_signature_path)
+        print(f"NEXT TENANT_SIG_PATH: {tenant_signature_path}")
+        if os.path.exists(tenant_signature_path):
+            tenant_signature = Image(tenant_signature_path, width=200, height=50)
+            tenant_signature.hAlign = 'CENTER'
+            print(f"TENANT_SIG_IMAGE: {tenant_signature}")
+            content.append(Spacer(1, 0.3 * inch))
+            content.append(Paragraph("Tenant Signature:"))
+            content.append(tenant_signature)
+        else:
+            content.append(Paragraph("Tenant Signature: Image not available.", styles["Normal"]))
+    else:
+        content.append(Paragraph("Tenant Signature: ___________________________", styles["Normal"]))
 
-    # Build PDF
+    # Build the PDF
     pdf.build(content)
 
-    # Save lease document path to DB
-    lease.document_url = f"lease_{lease_id}.pdf"
-    db.session.commit()
-
     return send_file(file_path, as_attachment=True)
+
+@main.route('/leases/sign_lease/<int:lease_id>', methods=['GET', 'POST'])
+def sign_lease(lease_id):
+    lease = LeaseAgreement.query.get_or_404(lease_id)
+    user = User.query.get(session['user_id'])
+
+    if user.role != 'Landlord':
+        flash("Access denied.", "danger")
+        return redirect(url_for('main.home'))
+
+    if request.method == 'POST':
+        signature_data = request.form.get('signatureData')  # Ensure this matches the name in your form
+
+        # Check if signature data exists
+        if signature_data:
+            print(f"SIGNATURE DATA: {signature_data}")
+            try:
+                # Remove the base64 prefix (data:image/png;base64,)
+                signature_data = signature_data.split(',')[1]
+                signature_image = Image.open(BytesIO(base64.b64decode(signature_data)))  # Decode the base64 string
+
+                # Set file path for the image
+                lease_folder = os.path.join(current_app.root_path, "leases")
+                if not os.path.exists(lease_folder):
+                    os.makedirs(lease_folder)
+
+                signature_filename = f"{user.id}_signature.png"
+                signature_path = os.path.join(lease_folder, secure_filename(signature_filename))
+
+                # Save the signature image
+                signature_image.save(signature_path)
+                print(f"IMAGE SAVED: {signature_image}")
+
+                # Update the lease agreement with the signature path
+                lease.landlord_signature_path = signature_path
+                db.session.commit()
+
+                flash("Lease signed successfully!", "success")
+                return redirect(url_for('main.leases'))
+
+            except Exception as e:
+                flash(f"Error saving signature: {str(e)}", "danger")
+                return redirect(url_for('main.leases'))
+
+        flash("Lease was not signed! Please try again.", "danger")
+        return redirect(url_for('main.leases'))
+
+    return render_template('sign_lease.html', lease=lease)
+
+# You can now add the signature canvas to the HTML page where landlords sign the lease.
 
 @main.route('/download_lease/<int:lease_id>')
 def download_lease(lease_id):
