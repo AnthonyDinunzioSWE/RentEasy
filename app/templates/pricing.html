@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Pricing - RentEasy{% endblock %}
+
+{% block content %}
+<div class="text-center mt-10">
+    <h1 class="text-4xl font-bold">Pricing</h1>
+    <p class="mt-4 text-lg">Choose the plan that fits your needs</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold">Basic</h2>
+            <p class="mt-2 text-lg">$10/month</p>
+            <p class="mt-4">Basic features with limited property management</p>
+            <a href="#" class="mt-6 inline-block px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400">Choose Plan</a>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold">Pro</h2>
+            <p class="mt-2 text-lg">$20/month</p>
+            <p class="mt-4">Full access to all features including billing and reporting</p>
+            <a href="#" class="mt-6 inline-block px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400">Choose Plan</a>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold">Enterprise</h2>
+            <p class="mt-2 text-lg">$50/month</p>
+            <p class="mt-4">Advanced tools for large-scale property management</p>
+            <a href="#" class="mt-6 inline-block px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400">Choose Plan</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

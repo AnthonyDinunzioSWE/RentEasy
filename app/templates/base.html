@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RentEasy{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+
+    <!-- Navbar -->
+    <nav class="bg-gray-800 p-4">
+        <div class="flex justify-between items-center">
+            <a href="{{ url_for('main.home') }}" class="text-2xl font-bold">RentEasy</a>
+            <div class="space-x-4">
+                <a href="{{ url_for('main.home') }}" class="hover:text-gray-400">Home</a>
+                <a href="{{ url_for('main.pricing') }}" class="hover:text-gray-400">Pricing</a>
+                <a href="{{ url_for('main.faq') }}" class="hover:text-gray-400">FAQ</a>
+    
+                {% if 'user_role' in session %}
+                    {% if session['user_role'] == 'Landlord' %}
+                        <a href="{{ url_for('main.tenants') }}">Tenants</a>
+                        <a href="{{ url_for('main.properties') }}">Properties</a>
+                        <a href="{{ url_for('main.billing') }}">Billing</a>
+                        <a href="{{ url_for('main.leases') }}">Leases</a>
+                    {% elif session['user_role'] == 'Admin' %}
+                        <a href="{{ url_for('main.dashboard') }}" class="hover:text-gray-400">Dashboard</a>
+                    {% endif %}
+                    <a href="{{ url_for('main.logout') }}" class="hover:text-gray-400">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('main.login') }}" class="hover:text-gray-400">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>    
+
+    <!-- Flash Messages -->
+    <div class="container mx-auto mt-4 px-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message px-4 py-3 rounded-lg shadow-md mb-2 text-white relative 
+                        {% if category == 'success' %} bg-green-500 {% elif category == 'error' %} bg-red-500 {% elif category == 'warning' %} bg-yellow-500 {% else %} bg-blue-500 {% endif %}">
+                        <span>{{ message }}</span>
+                        <button onclick="this.parentElement.style.display='none'" class="absolute top-0 right-0 p-2 text-white">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto p-6">
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>

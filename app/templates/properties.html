@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-8">
+    <h1 class="text-3xl font-semibold text-white mb-4">Properties</h1>
+
+    <!-- Redirect to the "Add Property" Form Page -->
+    <a href="{{ url_for('main.add_property') }}" class="text-blue-500 hover:underline mb-4 inline-block">Add Property</a>
+
+</div>
+
+<!-- Properties List -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    {% for property in properties %}
+    <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
+        <h2 class="text-xl font-semibold text-white">{{ property.address }} #{{ property.unit_number }}</h2>
+        <p class="text-gray-400">Rent: ${{ property.rent_amount }}</p>
+        <p class="text-gray-400">Status: {{ property.status }}</p>
+
+        <!-- Edit and Delete Buttons -->
+        <div class="mt-4 flex justify-between">
+            <a href="{{ url_for('main.update_property', property_id=property.id) }}" class="text-blue-500 hover:underline">Edit</a>
+            <form method="POST" action="{{ url_for('main.delete_property', property_id=property.id) }}" style="display: inline;">
+                <input type="hidden" name="_method" value="DELETE">
+                <input type="hidden" name="property_id" value="{{ property.id }}">
+                <button type="submit" class="text-red-500 hover:underline">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

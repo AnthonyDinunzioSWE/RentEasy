@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-8">
+    <h1 class="text-3xl font-semibold text-white mb-6">Dashboard</h1>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold text-white">Users</h2>
+            <p class="text-gray-400">Total: {{ users | length }}</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold text-white">Tenants</h2>
+            <p class="text-gray-400">Total: {{ tenants | length }}</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold text-white">Properties</h2>
+            <p class="text-gray-400">Total: {{ properties | length }}</p>
+        </div>
+    </div>
+
+    <div class="mt-8">
+        <h2 class="text-2xl font-semibold text-white mb-4">Recent Payments</h2>
+        <table class="min-w-full bg-gray-800 text-white">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 text-left">Tenant</th>
+                    <th class="py-2 px-4 text-left">Amount</th>
+                    <th class="py-2 px-4 text-left">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr>
+                    <td class="py-2 px-4">{{ payment.tenant.name }}</td>
+                    <td class="py-2 px-4">${{ payment.amount }}</td>
+                    <td class="py-2 px-4">{{ payment.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

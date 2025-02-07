@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto p-6 text-white">
+    <h1 class="text-3xl font-bold mb-6">Leases Management</h1>
+    
+    <!-- Lease List -->
+    <div class="bg-gray-900 p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-semibold mb-4">Current Leases</h2>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="border-b border-gray-700">
+                    <th class="p-3">Tenant</th>
+                    <th class="p-3">Property</th>
+                    <th class="p-3">Start Date</th>
+                    <th class="p-3">End Date</th>
+                    <th class="p-3">Rent</th>
+                    <th class="p-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lease in leases %}
+                <tr class="border-b border-gray-800 hover:bg-gray-800">
+                    <td class="p-3 text-white-300">{{ lease.tenant_name }}</td>
+                    <td class="p-3 text-white-300">{{ lease.property_name }}</td>
+                    <td class="p-3 text-white-300">{{ lease.lease_start }}</td>
+                    <td class="p-3 text-white-300">{{ lease.lease_end }}</td>
+                    <td class="p-3 text-white-300">${{ lease.rent }}</td>
+                    <td class="p-3 text-white-300">
+                        <!-- Edit Button -->
+                        <button onclick="openEditModal('{{ lease.id }}', '{{ lease.tenant_id }}', '{{ lease.property_id }}', '{{ lease.lease_start }}', '{{ lease.lease_end }}', '{{ lease.rent }}')" 
+                            class="text-blue-400 hover:underline">
+                            Edit
+                        </button>
+                        <form action="{{ url_for('main.delete_lease', lease_id=lease.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="text-red-400 hover:underline ml-3 bg-transparent border-none cursor-pointer">Delete</button>
+                        </form>
+                        <a href="{{ url_for('main.download_lease', lease_id=lease.id) }}" class="text-green-400 hover:underline ml-3">Download</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <form action="{{ url_for('main.leases') }}" method="POST" class="space-y-4">
+        <!-- Tenant Selector -->
+        <select name="tenant_id" required class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+            <option value="">Select Tenant</option>
+            {% for tenant in tenants %}
+            <option value="{{ tenant.id }}">{{ tenant.name }}</option>
+            {% endfor %}
+        </select>
+    
+        <!-- Property Selector -->
+        <select name="property_id" required class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+            <option value="">Select Property</option>
+            {% for property in properties %}
+            <option value="{{ property.id }}">{{ property.address }}</option>
+            {% endfor %}
+        </select>
+    
+        <input type="date" name="start_date" required class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+        <input type="date" name="end_date" required class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+        <input type="number" name="rent" placeholder="Rent Amount" required class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+    
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Add Lease</button>
+    </form>
+    
+</div>
+
+<!-- Edit Lease Modal -->
+<div id="editLeaseModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-gray-900 p-6 rounded-lg shadow-lg w-96">
+        {% for lease in leases %}
+        <h2 class="text-xl font-semibold mb-4">Edit Lease</h2>
+
+        <form id="editLeaseForm" method="POST" action="{{ url_for('main.update_lease', lease_id=lease.id) }}">
+            <input type="hidden" name="lease_id" id="editLeaseId">
+
+            <label class="block text-white">Tenant</label>
+            <select name="tenant_id" id="editTenant" class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+                {% for tenant in tenants %}
+                <option value="{{ tenant.id }}">{{ tenant.name }}</option>
+                {% endfor %}
+            </select>
+
+            <label class="block text-white">Property</label>
+            <select name="property_id" id="editProperty" class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+                {% for property in properties %}
+                <option value="{{ property.id }}">{{ property.address }}</option>
+                {% endfor %}
+            </select>
+
+            <label class="block text-white">Start Date</label>
+            <input type="date" name="start_date" id="editStartDate" class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+
+            <label class="block text-white">End Date</label>
+            <input type="date" name="end_date" id="editEndDate" class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+
+            <label class="block text-white">Rent</label>
+            <input type="number" name="rent" id="editRent" class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+
+            <div class="flex justify-end space-x-2 mt-4">
+                <button type="button" onclick="closeEditModal()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">
+                    Cancel
+                </button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function openEditModal(id, tenantId, propertyId, startDate, endDate, rent) {
+        document.getElementById("editLeaseId").value = id;
+        document.getElementById("editStartDate").value = startDate;
+        document.getElementById("editEndDate").value = endDate;
+        document.getElementById("editRent").value = rent;
+
+        // Set the selected tenant and property
+        document.getElementById("editTenant").value = tenantId;
+        document.getElementById("editProperty").value = propertyId;
+
+        document.getElementById("editLeaseModal").classList.remove("hidden");
+    }
+    
+    function closeEditModal() {
+        document.getElementById("editLeaseModal").classList.add("hidden");
+    }
+</script>    
+{% endblock %}

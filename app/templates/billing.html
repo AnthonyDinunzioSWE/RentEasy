@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto p-6 text-white">
+    <h1 class="text-3xl font-bold mb-6">Billing Management</h1>
+
+    <!-- Invoices List -->
+    <div class="bg-gray-900 p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-semibold mb-4">Invoices</h2>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="border-b border-gray-700">
+                    <th class="p-3">Tenant</th>
+                    <th class="p-3">Amount</th>
+                    <th class="p-3">Paid</th>
+                    <th class="p-3">Due Date</th>
+                    <th class="p-3">Status</th>
+                    <th class="p-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr class="border-b border-gray-800 hover:bg-gray-800">
+                    <td class="p-3">{{ invoice.tenant_name }}</td>
+                    <td class="p-3">${{ invoice.amount }}</td>
+                    <td class="p-3">${{ invoice.paid_amount }}</td>
+                    <td class="p-3">{{ invoice.due_date }}</td>
+                    <td class="p-3">
+                        {% if invoice.status == "Paid" %}
+                            <span class="text-green-400">Paid</span>
+                        {% elif invoice.status == "Partially Paid" %}
+                            <span class="text-yellow-400">Partially Paid</span>
+                        {% else %}
+                            <span class="text-red-400">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td class="p-3">
+                        <!-- Edit Button -->
+                        <button onclick="openEditModal('{{ invoice.id }}', '{{ invoice.paid_amount }}')" 
+                            class="text-blue-400 hover:underline">
+                            Edit
+                        </button>
+                        <form action="{{ url_for('main.delete_invoice', invoice_id=invoice.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="text-red-400 hover:underline ml-3 bg-transparent border-none cursor-pointer">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Create Invoice Form -->
+    <form action="{{ url_for('main.billing') }}" method="POST" class="space-y-4 mt-6">
+        <h2 class="text-xl font-semibold">Create New Invoice</h2>
+        
+        <select name="tenant_id" required class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+            <option value="">Select Tenant</option>
+            {% for tenant in tenants %}
+            <option value="{{ tenant.id }}">{{ tenant.name }}</option>
+            {% endfor %}
+        </select>
+
+        <input type="number" name="amount" placeholder="Amount" required class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white" min="0">
+
+        <input type="date" name="due_date" required class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+
+        <textarea name="description" placeholder="Description" class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white"></textarea>
+
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            Create Invoice
+        </button>
+    </form>
+</div>
+
+<!-- Edit Invoice Modal -->
+<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div class="bg-gray-900 p-6 rounded-lg">
+        <h2 class="text-xl font-semibold mb-4">Update Invoice</h2>
+        <form action="{{ url_for('main.update_invoice') }}" method="POST">
+            <input type="hidden" name="invoice_id" id="editInvoiceId">
+            
+            <label for="editPaidAmount" class="block mb-2">Paid Amount:</label>
+            <input type="number" name="paid_amount" id="editPaidAmount" required class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+
+            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg mt-4 hover:bg-green-600">Update</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditModal(id, paidAmount) {
+    document.getElementById('editInvoiceId').value = id;
+    document.getElementById('editPaidAmount').value = paidAmount;
+    document.getElementById('editModal').classList.remove('hidden');
+}
+</script>
+
+{% endblock %}
