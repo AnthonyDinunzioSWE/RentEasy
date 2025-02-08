@@ -391,9 +391,9 @@ def generate_lease(lease_id, landlord_signature_path=None, tenant_signature_path
     landlord_info = f"<b>Landlord:</b> {landlord.name} <br/> <b>Tenant:</b> {lease.tenant_name}"
     property_info = f"<b>Property:</b> {lease.property_name} <br/> <b>Address:</b> {lease.property_name}"
     lease_terms = f"<b>Lease Start:</b> {lease.lease_start} <br/> <b>Lease End:</b> {lease.lease_end}"
-
-    landlord_signature_path = os.path.join(lease_folder, lease.landlord_signature_path)
-    tenant_signature_path = os.path.join(lease_folder, lease.tenant_signature_path)
+    # Ensure signature paths are not None before joining
+    landlord_signature_path = os.path.join(lease_folder, lease.landlord_signature_path) if lease.landlord_signature_path else None
+    tenant_signature_path = os.path.join(lease_folder, lease.tenant_signature_path) if lease.tenant_signature_path else None
 
     print(f'Landlord sig: {landlord_signature_path}')
     print(f'tenant sig: {tenant_signature_path}')
@@ -437,20 +437,14 @@ def generate_lease(lease_id, landlord_signature_path=None, tenant_signature_path
         content.append(landlord_signature)
     else:
         content.append(Paragraph("Landlord Signature: Image not available.", styles["Normal"]))
-    if tenant_signature_path:
-        print(f"PREV TENANT_SIG_PATH: {tenant_signature_path}")
-        # Ensure the tenant signature image exists
-        tenant_signature_path = os.path.join(uploads_folder, tenant_signature_path)
-        print(f"NEXT TENANT_SIG_PATH: {tenant_signature_path}")
-        if os.path.exists(tenant_signature_path):
-            tenant_signature = Image(tenant_signature_path, width=200, height=50)
-            tenant_signature.hAlign = 'CENTER'
-            print(f"TENANT_SIG_IMAGE: {tenant_signature}")
-            content.append(Spacer(1, 0.3 * inch))
-            content.append(Paragraph("Tenant Signature:"))
-            content.append(tenant_signature)
-        else:
-            content.append(Paragraph("Tenant Signature: Image not available.", styles["Normal"]))
+    if lease.tenant_signature_path:
+        tenant_signature_path = os.path.join(uploads_folder, lease.tenant_signature_path)  # FIXED
+    if os.path.exists(tenant_signature_path):
+        tenant_signature = Image(tenant_signature_path, width=200, height=50)
+        tenant_signature.hAlign = 'CENTER'
+        content.append(Spacer(1, 0.3 * inch))
+        content.append(Paragraph("Tenant Signature:"))
+        content.append(tenant_signature)
     else:
         content.append(Paragraph("Tenant Signature: ___________________________", styles["Normal"]))
 
@@ -626,3 +620,40 @@ def logout():
     session['user_id'] = None
     session['user_role'] = None
     return redirect(url_for('main.home'))
+
+@main.route('/upload_landlord_signature/<int:lease_id>', methods=['POST'])
+def upload_landlord_signature(lease_id):
+    data_url = request.form.get('signatureData')
+
+    if not data_url:
+        return jsonify({'error': 'No signature data received'}), 400
+
+    lease = LeaseAgreement.query.get(lease_id)
+    if not lease:
+        return jsonify({'error': 'Lease agreement not found'}), 404
+
+    try:
+        # Decode base64 image data
+        header, encoded = data_url.split(',', 1)
+        image_data = base64.b64decode(encoded)
+
+        # Define upload directory
+        upload_dir = os.path.join(current_app.root_path, 'uploads')
+        if not os.path.exists(upload_dir):
+            os.makedirs(upload_dir)
+
+        # Save the image
+        file_name = f"{session['user_id']}_signature.png"
+        file_path = os.path.join(upload_dir, file_name)
+
+        with open(file_path, 'wb') as f:
+            f.write(image_data)
+
+        # Update database
+        lease.landlord_signature_path = file_name
+        db.session.commit()
+
+        flash('success', 'Successfully Signed Lease Agreement.')
+        return redirect(url_for('main.leases'))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

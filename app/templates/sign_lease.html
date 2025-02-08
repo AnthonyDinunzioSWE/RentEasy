@@ -10,7 +10,7 @@
             <button id="clearSignature" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg">Clear</button>
             
             <!-- Signature Save Form -->
-            <form id="saveSignatureForm" action="{{ url_for('main.sign_lease', lease_id=lease.id) }}" method="POST">
+            <form id="saveSignatureForm" action="{{ url_for('main.upload_landlord_signature', lease_id=lease.id) }}" method="POST">
                 <!-- Hidden field to store the signature data -->
                 <input type="hidden" id="signatureData" name="signatureData">
                 <button type="submit" id="saveSignature" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg">Save</button>

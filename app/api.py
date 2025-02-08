@@ -239,32 +239,29 @@ def get_tenant(user_id):
         "landlord_id": tenant.landlord_id,
     })
 
-
-
 @api.route('/upload_signature/<int:user_id>', methods=['POST'])
 def upload_signature(user_id):
     if 'signature' not in request.files:
-        print("NO SIGNATURE FILE IN REQUEST!")
         return jsonify({'error': 'No signature uploaded'}), 400
     
     signature_file = request.files['signature']
     
-    # Ensure the 'uploads' directory exists or create it
+    # Ensure 'uploads' directory exists
     upload_dir = os.path.join(current_app.root_path, 'uploads')
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
     
-    # Save the file with a unique name
+    # Save file
     file_path = os.path.join(upload_dir, f'{user_id}_signature.png')
     signature_file.save(file_path)
 
     # Retrieve user, tenant, and lease info
-    user = User.query.get(user_id)
     tenant = Tenant.query.filter_by(user_id=user_id).first()
     lease = LeaseAgreement.query.filter_by(tenant_id=tenant.id).first()
 
     if lease:
-        # Generate lease with the provided signature
+        lease.tenant_signature_path = f'{user_id}_signature.png'  # Store only the filename
+        db.session.commit()
         generate_lease(lease.id, tenant_signature_path=file_path)
 
     return jsonify({'message': 'Signature uploaded successfully', 'file_path': file_path}), 200
