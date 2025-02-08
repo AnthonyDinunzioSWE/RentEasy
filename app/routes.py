@@ -1,6 +1,6 @@
 from io import BytesIO
 import os
-from flask import Blueprint, current_app, jsonify, render_template, redirect, url_for, request, session, flash, send_file
+from flask import Blueprint, current_app, jsonify, render_template, redirect, send_from_directory, url_for, request, session, flash, send_file
 from .models import db, User, Tenant, Property, Payment, Invoice, LeaseAgreement
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -77,6 +77,14 @@ def create_landlord():
 @main.route('/pricing')
 def pricing():
     return render_template('pricing.html')
+
+@main.route('/download-app')
+def download_apk():
+    return send_from_directory('static/apk', 'app-debug.apk', as_attachment=True)
+
+@main.route('/download')
+def download():
+    return render_template('download.html')
 
 @main.route('/faq')
 def faq():

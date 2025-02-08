@@ -17,7 +17,8 @@
                 <a href="{{ url_for('main.home') }}" class="hover:text-gray-400">Home</a>
                 <a href="{{ url_for('main.pricing') }}" class="hover:text-gray-400">Pricing</a>
                 <a href="{{ url_for('main.faq') }}" class="hover:text-gray-400">FAQ</a>
-    
+                <a href="{{ url_for('main.download') }}" class="hover:text-gray-400">Download</a>
+
                 {% if 'user_role' in session %}
                     {% if session['user_role'] == 'Landlord' %}
                         <a href="{{ url_for('main.tenants') }}">Tenants</a>

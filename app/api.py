@@ -20,8 +20,13 @@ def login():
     data = request.get_json()
     email = data.get("email")
     password = data.get("password")
+    
+    print("DATA", data)
+    print("EMAIL: ", email)
+    print("PASSWORD: ", password)
 
     user = User.query.filter_by(email=email).first()
+    print("USER: ", user)
     if user and check_password_hash(user.password_hash, password):
         return jsonify({
             "message": "Login successful",

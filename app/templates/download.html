@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Donwload - RentEasy{% endblock %}
+
+{% block content %}
+<div class="text-center mt-10">
+    <h1 class="text-4xl font-bold">Download the Android App!</h1>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-6 mt-4">
+            <h2 class="text-2xl font-bold">The All In ONE Tenant Companion App</h2>
+            <p class="mt-2">Manage Lease Agreement, Manage Property Details, Contact Landlord, and so much more!</p>
+        </div>
+    <a class="text-4xl text-green-400 hover:text-green-700" href="{{ url_for('main.download_apk') }}">Download App</a>
+</div>
+{% endblock %}
