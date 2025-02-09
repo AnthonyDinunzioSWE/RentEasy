@@ -1,83 +1,134 @@
-<h1 align="center">
-  <br>
-  <a href="https://github.com/YourUsername/RentEasy"><img src="your-logo.png" alt="RentEasy" width="200"></a>
-  <br>
-  RentEasy
-  <br>
-</h1>
+RentEasy - Property Management Platform
+=======================================
 
-<h4 align="center">A property management tool for landlords built with Flask, React, and Android Studio.</h4>
+Project Overview
+----------------
 
-<p align="center">
-  <a href="https://badge.fury.io/js/renteasy">
-    <img src="https://badge.fury.io/js/renteasy.svg" alt="Gitter">
-  </a>
-  <a href="https://gitter.im/YourUsername/renteasy"><img src="https://badges.gitter.im/YourUsername/renteasy.svg"></a>
-  <a href="https://saythanks.io/to/youremail">
-    <img src="https://img.shields.io/badge/SayThanks.io-%E2%98%BC-1EAEDB.svg">
-  </a>
-  <a href="https://www.paypal.me/YourUsername">
-    <img src="https://img.shields.io/badge/$-donate-ff69b4.svg?maxAge=2592000&amp;style=flat">
-  </a>
-</p>
+RentEasy is a comprehensive Property Management Platform designed for landlords and tenants. The platform provides an efficient solution for managing rental properties, lease agreements, and payments. It includes a **Landlord/Admin Portal** and a **Tenant Companion App** for Android.
 
-<p align="center">
-  <a href="#key-features">Key Features</a> •
-  <a href="#how-to-use">How To Use</a> •
-  <a href="#download">Download</a> •
-  <a href="#credits">Credits</a> •
-  <a href="#license">License</a>
-</p>
+-   **Landlords/Admins**: Manage properties, tenants, lease agreements, and rent payments.
+-   **Tenants**: Access lease agreements, make rent payments, and track their expenses.
 
-![screenshot](your-screenshot.png)
+Features
+--------
 
-## Key Features
+### Landlord/Admin Portal
 
-* **Landlord Dashboard**
-  - Keep track of tenants, rent payments, and maintenance requests with a user-friendly interface.
-* **Tenant Portal**
-  - Tenants can make rent payments, view lease agreements, and submit maintenance requests.
-* **Secure Authentication**
-  - Easily manage landlord accounts and secure login options.
-* **Mobile Companion App (Android)**
-  - Use the RentEasy Android app to access and manage all landlord features on the go.
-* **Customizable Settings**
-  - Customize your experience with multiple settings and preferences.
-* **Cross-platform**
-  - Fully functional website and mobile app that work seamlessly across devices.
+-   **Dashboard**: Overview of properties, upcoming payments, and lease statuses.
+-   **Tenant Management**: Add, view, and manage tenant details and payment history.
+-   **Property Management**: Add, edit, and delete properties; track property occupancy.
+-   **Lease Agreement Management**: Create, send, and track digital lease agreements.
+-   **Billing & Payments**: Generate rent invoices and track rent payments and outstanding balances.
 
-## How To Use
+### Tenant Companion App (Android)
 
-To clone and run this application, you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
+-   **User Authentication**: Tenants log in with credentials created by landlords.
+-   **Lease Agreement Management**: View and sign lease agreements.
+-   **Billing & Payments**: View rent breakdown, make payments, and track past payments.
 
-```bash
-# Clone this repository
-$ git clone https://github.com/YourUsername/RentEasy
+Tech Stack
+----------
 
-# Go into the repository
-$ cd RentEasy
+-   **Backend**: Flask (Python)
+-   **Frontend**: React
+-   **Mobile App**: React Native (Android)
+-   **Database**: SQLAlchemy (PostgreSQL)
+-   **Hosting**: Render (for the Flask website), APK hosted for Android app download
 
-# Install backend dependencies
-$ cd backend && npm install
+How to Test Locally
+-------------------
 
-# Install frontend dependencies
-$ cd frontend && npm install
+### Clone the Repository
 
-# Run the backend server
-$ cd backend && npm start
+1.  Clone the repo:
 
-# Run the frontend development server
-$ cd frontend && npm start
-To run the Android app, you’ll need Android Studio installed. Once setup, you can run the app on your emulator or device.
-```
+    bash
 
-Download
-You can download the latest release for the web app.
+    CopyEdit
 
-For the mobile app, you can download the APK file or install it via Google Play Store once the app is published.
+    `git clone https://github.com/yourusername/renteasy.git
+    cd renteasy`
 
-Flask
-SQL
-Android Studio
+### Backend (Flask)
 
-GitHub @AnthonyDinunzioSWE
+1.  Install the required dependencies:
+
+    bash
+
+    CopyEdit
+
+    `pip install -r requirements.txt`
+
+2.  Set up the environment variables and database.
+
+3.  Run the backend server:
+
+    bash
+
+    CopyEdit
+
+    `flask run`
+
+4.  The Flask app will be accessible at `http://127.0.0.1:5000`.
+
+### Frontend (React)
+
+1.  Navigate to the frontend directory:
+
+    bash
+
+    CopyEdit
+
+    `cd frontend`
+
+2.  Install the required dependencies:
+
+    bash
+
+    CopyEdit
+
+    `npm install`
+
+3.  Run the React development server:
+
+    bash
+
+    CopyEdit
+
+    `npm start`
+
+4.  The React app will be accessible at `http://localhost:3000`.
+
+APK Testing
+-----------
+
+To test the **Tenant Companion App** on Android:
+
+1.  Download the APK file from [here](https://yourlink.com).
+2.  Enable "Install from unknown sources" in your Android device settings.
+3.  Install the APK and open the app to test the tenant functionalities.
+
+You can also view a demo of the app in action via the video or screenshot below:
+
+Contributing
+------------
+
+We welcome contributions to RentEasy. If you would like to help out, please follow these steps:
+
+1.  Fork the repository.
+2.  Create a feature branch (`git checkout -b feature-name`).
+3.  Commit your changes (`git commit -am 'Add feature'`).
+4.  Push to the branch (`git push origin feature-name`).
+5.  Submit a pull request.
+
+If you find any issues, feel free to open an issue via the GitHub Issues tab.
+
+Link to Live Demo
+-----------------
+
+-   **Live Flask Website Demo**: https://renteasy.onrender.com
+-   **Download the APK for Android**: [Download Link](https://yourlink.com)
+
+* * * * *
+
+This version sticks to the structure you outlined, providing an organized and clean README with necessary details for testing and contributing. Let me know if you'd like any adjustments!
