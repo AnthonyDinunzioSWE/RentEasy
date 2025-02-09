@@ -1,59 +1,59 @@
-# ![RentEasy Logo](https://renteasy.online/images/logo.jpeg) RentEasy - Property Management Platform
+![RentEasy Logo](https://renteasy.online/images/logo.jpeg)
+---
+
+# <span style="color:#3498db">RentEasy</span> - Property Management Platform
 
 ---
 
-## Project Overview
-**RentEasy** is a comprehensive Property Management Platform designed for both landlords and tenants. The platform provides an efficient solution for managing rental properties, lease agreements, and payments. It includes a **Landlord/Admin Portal** and a **Tenant Companion App** for Android.
+### <span style="color:#2ecc71">Project Overview</span>
+**RentEasy** is a comprehensive Property Management Platform designed for both landlords and tenants. The platform provides an efficient solution for managing rental properties, lease agreements, and payments. 
 
 - **Landlords/Admins**: Manage properties, tenants, lease agreements, and rent payments.
 - **Tenants**: Access lease agreements, make rent payments, and track their expenses.
 
 ---
 
-## Link to Live Demo
-
+### <span style="color:#2ecc71">Link to Live Demo</span>
 - **Live Flask Website Demo**: [Live View](https://renteasy-fupc.onrender.com/)
 - **Download the APK for Android**: [Download Link](https://renteasy-fupc.onrender.com/download-app)
 
 ---
 
-## Features
+### <span style="color:#2ecc71">Key Features</span>
 
-### Landlord/Admin Portal
-
+#### <span style="color:#e74c3c">Landlord/Admin Portal</span>
 - **Dashboard**: Overview of properties, upcoming payments, and lease statuses.
 - **Tenant Management**: Add, view, and manage tenant details and payment history.
 - **Property Management**: Add, edit, and delete properties; track property occupancy.
 - **Lease Agreement Management**: Create, send, and track digital lease agreements.
 - **Billing & Payments**: Generate rent invoices and track rent payments and outstanding balances.
 
-### Tenant Companion App (Android)
-
+#### <span style="color:#e74c3c">Tenant Companion App (Android)</span>
 - **User Authentication**: Tenants log in with credentials created by landlords.
 - **Lease Agreement Management**: View and sign lease agreements.
 - **Billing & Payments**: View rent breakdown, make payments, and track past payments.
 
 ---
 
-## Tech Stack
+### <span style="color:#2ecc71">Tech Stack</span>
 
 - **Backend**: Flask (Python)
 - **Frontend**: React
 - **Mobile App**: React Native (Android)
 - **Database**: SQLAlchemy (PostgreSQL)
-- **Hosting**: Render (for the Flask website), APK hosted for Android app download
+- **Hosting**: Render (for Flask website), APK hosted for Android app download
 
 ---
 
-## How to Test Locally
+### <span style="color:#2ecc71">How to Test Locally</span>
 
-### Clone the Repository
+#### 1. **Clone the Repository**
 
 ```bash
 git clone https://github.com/yourusername/renteasy.git
 cd renteasy
 ```
-### Backend (Flask)
+#### 2\. **Backend (Flask)**
 
 1.  Install the required dependencies:
 
@@ -73,9 +73,9 @@ CopyEdit
 
 `flask run`
 
-1.  The Flask app will be accessible at `http://127.0.0.1:5000`.
+1.  The Flask app will be accessible at <http://127.0.0.1:5000>.
 
-### Frontend (React)
+#### 3\. **Frontend (React)**
 
 1.  Navigate to the frontend directory:
 
@@ -101,12 +101,11 @@ CopyEdit
 
 `npm start`
 
-1.  The React app will be accessible at `http://localhost:3000`.
+1.  The React app will be accessible at <http://localhost:3000>.
 
 * * * * *
 
-APK Testing
------------
+### <span style="color:#2ecc71">APK Testing</span>
 
 To test the **Tenant Companion App** on Android:
 
@@ -114,16 +113,15 @@ To test the **Tenant Companion App** on Android:
 2.  Enable "Install from unknown sources" in your Android device settings.
 3.  Install the APK and open the app to test the tenant functionalities.
 
-You can also view a demo of the app in action via the video or screenshot below:
+*You can also view a demo of the app in action via the video or screenshot below:*
 
 ![APK Demo Screenshot](https://link-to-your-screenshot-or-video.com)
 
 * * * * *
 
-Contributing
-------------
+### <span style="color:#2ecc71">Contributing</span>
 
-We welcome contributions to RentEasy. If you would like to help out, please follow these steps:
+We welcome contributions to RentEasy! If you'd like to help out, please follow these steps:
 
 1.  Fork the repository.
 2.  Create a feature branch (`git checkout -b feature-name`).
@@ -135,8 +133,13 @@ If you find any issues, feel free to open an issue via the GitHub Issues tab.
 
 * * * * *
 
-Link to Live Demo
------------------
+### <span style="color:#2ecc71">Link to Live Demo</span>
 
 -   **Live Flask Website Demo**: [Live View](https://renteasy-fupc.onrender.com/)
 -   **Download the APK for Android**: [Download Link](https://renteasy-fupc.onrender.com/download-app)
+
+* * * * *
+
+### <span style="color:#2ecc71">Notes</span>
+
+This README is structured to showcase the project in a professional manner. The main focus is on clarity, using appropriate headers and sections to divide the content into logical parts. By including relevant images, clear instructions, and live links, this layout makes the documentation easy to follow and accessible to all users.
