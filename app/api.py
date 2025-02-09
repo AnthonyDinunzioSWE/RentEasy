@@ -83,16 +83,25 @@ def get_rent_details(tenant_id):
 @api.route("/invoices/<int:tenant_id>", methods=["GET"])
 def get_invoices(tenant_id):
     invoices = Invoice.query.filter_by(tenant_id=tenant_id).all()
-    return jsonify([
-        {
+    print("INVOICES: ", invoices)
+
+    inv_list = []
+
+    # Sort the invoices based on their status
+    
+    for inv in invoices:
+        invoice_data = {
             "id": inv.id,
             "amount_due": inv.amount,
             "paid_amount": inv.paid_amount,
             "due_date": inv.due_date.strftime('%Y-%m-%d'),
             "status": inv.status,
             "description": inv.description
-        } for inv in invoices
-    ])
+        }
+        inv_list.append(invoice_data)
+
+    # Combine both sets of invoices (optional, based on requirement)
+    return jsonify(inv_list)
 
 
 # **Make a Payment (Full or Partial)**
@@ -103,11 +112,19 @@ def make_payment():
     tenant_id = data.get("tenant_id")
     amount_paid = data.get("amount_paid")
 
+    invoice_id = int(invoice_id)
+    tenant_id = int(tenant_id)
+    amount_paid = float(amount_paid)
+
+    user = User.query.get(tenant_id)
+    tenant = Tenant.query.filter_by(user_id=tenant_id).first()
+
     invoice = Invoice.query.get(invoice_id)
     if not invoice:
         return jsonify({"message": "Invoice not found"}), 404
 
-    if invoice.tenant_id != tenant_id:
+    if invoice.tenant_id != user.id:
+        print(f"Invoice Tenant ID: {invoice.tenant_id}, Request Tenant ID: {tenant.id}")
         return jsonify({"message": "Unauthorized payment attempt"}), 403
 
     new_payment = Payment(
@@ -220,29 +237,27 @@ def get_tenant(user_id):
     if not tenant:
         return jsonify({"message": "Tenant not found"}), 404
     
+    # Fetch the property details
     prop = Property.query.get(tenant.property_id)
     if not prop:
         return jsonify({'message': 'Property Not Found!'}), 404
-    
-    prop_data = jsonify({'address': prop.address,
-                         'unit_number': prop.unit_number,
-                         'rent_amount': prop.rent_amount})
-    
-    tenant_data = jsonify({"id": tenant.id,
-                           "property_id": tenant.property_id,
-                           "lease_start": tenant.lease_start.strftime('%Y-%m-%d'),
-                           "lease_end": tenant.lease_end.strftime('%Y-%m-%d'),
-                           "signed_status": tenant.signed_status,
-                           "landlord_id": tenant.landlord_id,})
 
-    return jsonify({
+    # Add property and tenant details to the response
+    tenant_data = {
         "id": tenant.id,
+        "tenant_name": tenant.tenant_name,
         "property_id": tenant.property_id,
+        "property_address": prop.address,
+        "unit_number": prop.unit_number,
+        "rent_amount": prop.rent_amount,
         "lease_start": tenant.lease_start.strftime('%Y-%m-%d'),
         "lease_end": tenant.lease_end.strftime('%Y-%m-%d'),
         "signed_status": tenant.signed_status,
+        "landlord_name": tenant.landlord_name,
         "landlord_id": tenant.landlord_id,
-    })
+    }
+
+    return jsonify(tenant_data)
 
 @api.route('/upload_signature/<int:user_id>', methods=['POST'])
 def upload_signature(user_id):
@@ -322,6 +337,12 @@ def generate_lease(lease_id, tenant_signature_path=None, landlord_signature_path
     """
     content.append(Paragraph(lease_terms_text, styles["Normal"]))
 
+    uploads_folder = os.path.join(current_app.root_path, 'uploads')
+    landlord_signature_path = lease.landlord_signature_path
+    tenant_signature_path = lease.tenant_signature_path
+
+    print(f"LANDLORD SIGNATURE FILE: ", landlord_signature_path)
+
     # Signatures section
     content.append(Spacer(1, 0.5 * inch))
     content.append(Paragraph("<b>Signatures:</b>", styles["Normal"]))
@@ -339,7 +360,8 @@ def generate_lease(lease_id, tenant_signature_path=None, landlord_signature_path
         content.append(Paragraph("Tenant Signature: ___________________________", styles["Normal"]))
     content.append(Spacer(1, 0.2 * inch))
 
-    if tenant_signature_path and os.path.exists(tenant_signature_path):
+    if tenant_signature_path:
+        tenant_signature_path = os.path.join(uploads_folder, tenant_signature_path)
         # Add the tenant signature image
         content.append(Paragraph("Tenant Signature:"))
         tenant_signature = Image(tenant_signature_path, width=200, height=50)
@@ -368,6 +390,7 @@ def download_lease(user_id):
     if not lease or not lease.document_url:
         return jsonify({"message": "Lease document not found"}), 404
 
+    generate_lease(lease.id)
     print('LEASE: ', lease)
     print('LEASE Document_URL: ', lease.document_url)
 

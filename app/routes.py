@@ -80,7 +80,7 @@ def pricing():
 
 @main.route('/download-app')
 def download_apk():
-    return send_from_directory('static/apk', 'app-debug.apk', as_attachment=True)
+    return send_from_directory('static/apk', 'app.apk', as_attachment=True)
 
 @main.route('/download')
 def download():
