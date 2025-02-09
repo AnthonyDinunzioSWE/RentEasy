@@ -9,6 +9,14 @@ RentEasy is a comprehensive Property Management Platform designed for landlords 
 -   **Landlords/Admins**: Manage properties, tenants, lease agreements, and rent payments.
 -   **Tenants**: Access lease agreements, make rent payments, and track their expenses.
 
+Link to Live Demo
+-----------------
+
+-   **Live Flask Website Demo**: [Live View](https://renteasy-fupc.onrender.com/)
+-   **Download the APK for Android**: [Download Link](https://renteasy-fupc.onrender.com/download-app)
+
+* * * * *
+
 Features
 --------
 
@@ -126,9 +134,7 @@ If you find any issues, feel free to open an issue via the GitHub Issues tab.
 Link to Live Demo
 -----------------
 
--   **Live Flask Website Demo**: https://renteasy.onrender.com
--   **Download the APK for Android**: [Download Link](https://yourlink.com)
+-   **Live Flask Website Demo**: [Live View](https://renteasy-fupc.onrender.com/)
+-   **Download the APK for Android**: [Download Link](https://renteasy-fupc.onrender.com/download-app)
 
 * * * * *
-
-This version sticks to the structure you outlined, providing an organized and clean README with necessary details for testing and contributing. Let me know if you'd like any adjustments!
