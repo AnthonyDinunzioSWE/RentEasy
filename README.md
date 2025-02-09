@@ -139,7 +139,3 @@ If you find any issues, feel free to open an issue via the GitHub Issues tab.
 -   **Download the APK for Android**: [Download Link](https://renteasy-fupc.onrender.com/download-app)
 
 * * * * *
-
-### <span style="color:#2ecc71">Notes</span>
-
-This README is structured to showcase the project in a professional manner. The main focus is on clarity, using appropriate headers and sections to divide the content into logical parts. By including relevant images, clear instructions, and live links, this layout makes the documentation easy to follow and accessible to all users.
