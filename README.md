@@ -1,7 +1,7 @@
 ![RentEasy Logo](https://renteasy.online/images/logo.jpeg)
----
 
-# <span style="color:#3498db">RentEasy</span> - Property Management Platform
+# <span style="color:#3498db text-align:center">RentEasy</span> - Property Management Platform 🏘️
+
 
 ---
 
