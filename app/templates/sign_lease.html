@@ -54,10 +54,16 @@
 
     // Save the signature when the Save button is clicked
     document.getElementById("saveSignature").addEventListener("click", (e) => {
-        const dataUrl = canvas.toDataURL("image/png");
+    e.preventDefault(); // Prevent the form from submitting immediately
 
-        // Set the signature data in the hidden input field
-        document.getElementById("signatureData").value = dataUrl;
-    });
+    const dataUrl = canvas.toDataURL("image/png");
+
+    // Set the signature data in the hidden input field
+    document.getElementById("signatureData").value = dataUrl;
+
+    // Now submit the form
+    document.getElementById("saveSignatureForm").submit();
+});
+
 </script>
 {% endblock %}

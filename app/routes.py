@@ -199,30 +199,30 @@ def add_property():
                 return redirect(url_for('main.properties'))
             return render_template('add_property.html')
 
-@main.route('/update_property', methods=['POST'])
-def update_property():
-    user = User.query.get(session['user_id'])
-    if user.role != 'Landlord':
-        flash("Access denied.", "danger")
-        return redirect(url_for('main.home'))
+@main.route('/update_property/<int:property_id>', methods=['GET', 'POST'])
+def update_property(property_id):
+    property = Property.query.get_or_404(property_id)
 
-    if request.method == 'POST' and '_method' in request.form and request.form['_method'] == 'PATCH':
-        property_id = request.form.get('property_id')
-        prop = Property.query.get(property_id)
+    if request.method == 'POST':
+        property.address = request.form['address']
+        property.unit_number = request.form['unit_number']
+        property.rent_amount = request.form['rent_amount']
+        property.status = request.form['status']
 
-        if prop and prop.landlord_id == user.id:
-            prop.address = request.form.get('address', prop.address)
-            prop.unit_number = request.form.get('unit_number', prop.unit_number)
-            prop.rent_amount = request.form.get('rent_amount', prop.rent_amount)
-            prop.status = request.form.get('status', prop.status)
-
+        try:
             db.session.commit()
-            flash("Property updated successfully!", "success")
-        else:
-            flash("Property not found or access denied.", "danger")
-        
-        return redirect(url_for('main.properties'))
+            flash('Property updated successfully!', 'success')
+            return redirect(url_for('main.properties'))  # Redirect to the properties list page after successful update
+        except:
+            db.session.rollback()
+            flash('There was an issue updating the property.', 'danger')
+
+    return render_template('update_property.html', property=property)
     
+    # Return a response for invalid methods (ideally should never hit this if form is correct)
+    flash("Invalid request method.", "danger")
+    return redirect(url_for('main.properties'))
+
 @main.route('/delete_property/<int:property_id>', methods=['POST'])
 def delete_property(property_id):
     property_to_delete = Property.query.get(property_id)
@@ -283,7 +283,6 @@ def update_tenant():
     if tenant:
         tenant_user = User.query.get(tenant.user_id)
         tenant_user.name = request.form.get('name')
-        tenant_user.email = request.form.get('email')
         lease_start_str = request.form.get('lease_start')
         lease_end_str = request.form.get('lease_end')
         tenant.lease_start = datetime.strptime(lease_start_str, '%Y-%m-%d')
@@ -384,77 +383,123 @@ def generate_lease(lease_id, landlord_signature_path=None, tenant_signature_path
 
     print(f"Uploads Folder {uploads_folder}")
 
-
     # Create a PDF Document
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+
+
     pdf = SimpleDocTemplate(file_path, pagesize=letter)
     styles = getSampleStyleSheet()
+
+    # Custom paragraph style for headings
+    heading_style = ParagraphStyle(
+        name="Heading1",
+        fontName="Helvetica-Bold",
+        fontSize=14,
+        alignment=1,  # Center aligned
+        spaceAfter=12
+    )
+
+    # Custom style for sections (e.g., Terms and conditions)
+    section_style = ParagraphStyle(
+        name="Section",
+        fontName="Helvetica-Bold",
+        fontSize=12,
+        alignment=0,  # Left aligned
+        spaceAfter=6
+    )
+
+    # Content list for the PDF
     content = []
 
     # Title
     title = Paragraph("<b>Residential Lease Agreement</b>", styles["Title"])
     content.append(title)
-    content.append(Spacer(1, 0.2 * inch))
+    content.append(Spacer(1, 0.4 * inch))
 
-    # Landlord & Tenant Info
-    landlord_info = f"<b>Landlord:</b> {landlord.name} <br/> <b>Tenant:</b> {lease.tenant_name}"
-    property_info = f"<b>Property:</b> {lease.property_name} <br/> <b>Address:</b> {lease.property_name}"
-    lease_terms = f"<b>Lease Start:</b> {lease.lease_start} <br/> <b>Lease End:</b> {lease.lease_end}"
-    # Ensure signature paths are not None before joining
-    landlord_signature_path = os.path.join(lease_folder, lease.landlord_signature_path) if lease.landlord_signature_path else None
-    tenant_signature_path = os.path.join(lease_folder, lease.tenant_signature_path) if lease.tenant_signature_path else None
-
-    print(f'Landlord sig: {landlord_signature_path}')
-    print(f'tenant sig: {tenant_signature_path}')
-
+    # Landlord and Tenant Information
+    content.append(Paragraph("<b>LANDLORD</b>", heading_style))
+    landlord_info = f"<b>Name:</b> {landlord.name} <br/> <br/>"
     content.append(Paragraph(landlord_info, styles["Normal"]))
-    content.append(Paragraph(property_info, styles["Normal"]))
-    content.append(Paragraph(lease_terms, styles["Normal"]))
-    content.append(Spacer(1, 0.3 * inch))
+    content.append(Spacer(1, 0.4 * inch))
 
-    # Rent Table
-    rent_data = [
-        ["Description", "Amount"],
-        ["Monthly Rent", f"${lease.rent}"]
-    ]
-    table = Table(rent_data, colWidths=[250, 150])
-    table.setStyle(TableStyle([ 
-        ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("GRID", (0, 0), (-1, -1), 1, colors.black),
-    ]))
-    content.append(table)
-    content.append(Spacer(1, 0.3 * inch))
+    content.append(Paragraph("<b>TENANT</b>", heading_style))
+    tenant_info = f"<b>Name:</b> {lease.tenant_name} <br/> <b>Address:</b> {lease.property_name} <br/>"
+    content.append(Paragraph(tenant_info, styles["Normal"]))
+    content.append(Spacer(1, 0.4 * inch))
+
+    # Property Information
+    content.append(Paragraph("<b>PROPERTY</b>", heading_style))
+    property_info = f"<b>Address:</b> {lease.property_name}"
+    content.append(Paragraph(property_info, styles["Normal"]))
+    content.append(Spacer(1, 0.4 * inch))
+
+    # Lease Term
+    content.append(Paragraph("<b>LEASE TERM</b>", heading_style))
+    lease_term_info = f"<b>Start Date:</b> {lease.lease_start} <br/> <b>End Date:</b> {lease.lease_end} <br/>"
+    content.append(Paragraph(lease_term_info, styles["Normal"]))
+    content.append(Spacer(1, 0.4 * inch))
+
+    # Rent Section
+    content.append(Paragraph("<b>RENT</b>", heading_style))
+    rent_info = f"<b>Monthly Rent:</b> ${lease.rent} <br/>"
+    content.append(Paragraph(rent_info, styles["Normal"]))
+    content.append(Spacer(1, 0.4 * inch))
+
+    # Security Deposit
+    content.append(Paragraph("<b>SECURITY DEPOSIT</b>", heading_style))
+    deposit_info = ""
+    content.append(Paragraph(deposit_info, styles["Normal"]))
+    content.append(Spacer(1, 0.4 * inch))
+
+    # Utilities Section
+    content.append(Paragraph("<b>UTILITIES</b>", heading_style))
+    utilities_info = f"<b>Tenant Responsibility:</b> <br/> <b>Landlord Responsibility:</b>"
+    content.append(Paragraph(utilities_info, styles["Normal"]))
+    content.append(Spacer(1, 0.4 * inch))
 
     # Terms & Conditions
-    lease_terms_text = """
-    <b>Terms & Conditions:</b> The tenant agrees to follow all property rules, maintain the unit in good condition,
-    and notify the landlord of any damages. Failure to pay rent on time will result in penalties.
+    content.append(Paragraph("<b>TERMS AND CONDITIONS</b>", heading_style))
+    terms_conditions = f"""
+    <b>1. Maintenance:</b> The tenant agrees to maintain the property in good condition.<br/>
+    <b>2. No Subletting:</b> The tenant shall not sublet or assign the lease.<br/>
+    <b>3. Pets:</b><br/>
+    <b>4. Smoking:</b> Smoking is prohibited inside the property.<br/>
+    <b>5. Insurance:</b> Tenant is encouraged to maintain renters insurance.<br/>
+    <b>6. Dispute Resolution:</b> In case of a dispute, both parties agree to arbitration.
     """
-    content.append(Paragraph(lease_terms_text, styles["Normal"]))
+    content.append(Paragraph(terms_conditions, styles["Normal"]))
+    content.append(Spacer(1, 0.4 * inch))
 
-    # Signatures section
+    # Signatures Section
     content.append(Spacer(1, 0.5 * inch))
-    content.append(Paragraph("<b>Signatures:</b>", styles["Normal"]))
+    content.append(Paragraph("<b>Signatures</b>", heading_style))
     content.append(Spacer(1, 0.2 * inch))
+
+    if lease.landlord_signature_path:
+        landlord_signature_path = os.path.join(uploads_folder, lease.landlord_signature_path)
+        if os.path.exists(landlord_signature_path):
+            landlord_signature = Image(landlord_signature_path, width=200, height=50)
+            landlord_signature.hAlign = 'CENTER'
+            content.append(Paragraph("Landlord Signature:"))
+            content.append(landlord_signature)
+        else:
+            content.append(Paragraph("Landlord Signature: ___________________________", styles["Normal"]))
+
+    content.append(Spacer(1, 0.3 * inch))
     
-    if landlord_signature_path and os.path.exists(landlord_signature_path):
-        landlord_signature = Image(landlord_signature_path, width=200, height=50)
-        landlord_signature.hAlign = 'CENTER'
-        content.append(Paragraph("Landlord Signature:"))
-        content.append(landlord_signature)
-    else:
-        content.append(Paragraph("Landlord Signature: Image not available.", styles["Normal"]))
     if lease.tenant_signature_path:
-        tenant_signature_path = os.path.join(uploads_folder, lease.tenant_signature_path)  # FIXED
-    if os.path.exists(tenant_signature_path):
-        tenant_signature = Image(tenant_signature_path, width=200, height=50)
-        tenant_signature.hAlign = 'CENTER'
-        content.append(Spacer(1, 0.3 * inch))
-        content.append(Paragraph("Tenant Signature:"))
-        content.append(tenant_signature)
-    else:
-        content.append(Paragraph("Tenant Signature: ___________________________", styles["Normal"]))
+        tenant_signature_path = os.path.join(uploads_folder, lease.tenant_signature_path)
+        if os.path.exists(tenant_signature_path):
+            tenant_signature = Image(tenant_signature_path, width=200, height=50)
+            tenant_signature.hAlign = 'CENTER'
+            content.append(Spacer(1, 0.3 * inch))
+            content.append(Paragraph("Tenant Signature:"))
+            content.append(tenant_signature)
+        else:
+            content.append(Paragraph("Tenant Signature: ___________________________", styles["Normal"]))
 
     # Build the PDF
     pdf.build(content)
@@ -483,11 +528,12 @@ def sign_lease(lease_id):
 
                 # Set file path for the image
                 lease_folder = os.path.join(current_app.root_path, "leases")
+                uploads_folder = os.path.join(current_app.root_path, "uploads")
                 if not os.path.exists(lease_folder):
                     os.makedirs(lease_folder)
 
                 signature_filename = f"{user.id}_signature.png"
-                signature_path = os.path.join(lease_folder, secure_filename(signature_filename))
+                signature_path = os.path.join(uploads_folder, secure_filename(signature_filename))
 
                 # Save the signature image
                 signature_image.save(signature_path)
@@ -665,3 +711,28 @@ def upload_landlord_signature(lease_id):
         return redirect(url_for('main.leases'))
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@main.route('/landlords', methods=['GET', 'POST'])
+def landlords():
+    user = User.query.get(session['user_id'])
+    if user.role != 'Admin':
+        flash("Access denied.", "danger")
+        return redirect(url_for('main.home'))
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        new_user = User(name=name, email=email, password_hash=generate_password_hash(password), role='Landlord')
+        db.session.add(new_user)
+        db.session.commit() 
+
+        flash("Landlord added successfully!", "success")
+        return redirect(url_for('main.landlords'))
+    
+    # Query the user's properties
+    properties = Property.query.filter_by(landlord_id=session['user_id']).all()
+    tenant_users = User.query.filter_by(role='Tenant', landlord_id=session['user_id']).all()
+    tenants = Tenant.query.filter_by(landlord_id=user.id).all()
+    return render_template('landlords.html', tenants=tenants, properties=properties, tenant_users=tenant_users)

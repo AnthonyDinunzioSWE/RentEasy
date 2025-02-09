@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-8">
+    <h1 class="text-3xl font-semibold text-white mb-4">Landlords</h1>
+
+    <!-- Link to Open Modal -->
+    <a href="javascript:void(0)" id="addLandlordButton" class="text-blue-500 hover:underline mb-4 inline-block">Add Landlord</a>
+
+    <!-- Landlord List -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {% for landlord in tenants %}
+            <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold text-white">{{ landlord.name }}</h2>
+                <p class="text-gray-400">Email: {{ landlord.email }}</p>
+                <p class="text-gray-400">Role: Landlord</p>
+                <p class="text-gray-400">Properties: 
+                    {% for property in properties %}
+                        {% if property.landlord_id == landlord.id %}
+                            {{ property.address }} #{{ property.unit_number }},
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                
+                <!-- Buttons -->
+                <div class="mt-4 flex justify-between">
+                    <button onclick="openEditLandlordModal('{{ landlord.id }}', '{{ landlord.name }}', '{{ landlord.email }}')" class="text-yellow-400 hover:underline">Edit</button>
+
+                    <form method="POST" action="{{ url_for('main.delete_landlord', user_id=landlord.id) }}" onsubmit="return confirm('Are you sure you want to delete this landlord?')">
+                        <button type="submit" class="text-red-500 hover:underline">Delete</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% for landlord in tenants %}
+<!-- Edit Landlord Modal -->
+<div id="editLandlordModal" class="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 hidden">
+    <div class="bg-gray-800 text-white p-8 rounded-lg w-1/3 shadow-lg relative">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Edit Landlord</h2>
+        <form method="POST" action="{{ url_for('main.update_landlord') }}">
+            <input type="hidden" name="landlord_id" id="edit_landlord_id">
+            <div class="mb-4">
+                <label for="edit_name" class="block text-sm font-medium">Name</label>
+                <input type="text" name="name" id="edit_name" class="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded" required>
+            </div>
+            <div class="mb-4">
+                <label for="edit_email" class="block text-sm font-medium">Email</label>
+                <input type="email" name="email" id="edit_email" class="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded" required>
+            </div>
+            <div class="mb-4">
+                <label for="edit_password" class="block text-sm font-medium">Password</label>
+                <input type="text" name="password" id="edit_password" class="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded" required>
+            </div>
+            <button type="submit" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Update Landlord</button>
+        </form>
+        <button id="closeEditLandlordModal" class="absolute top-0 right-0 p-2 text-red-500 hover:text-red-700">&times;</button>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Add Landlord Modal -->
+<div id="addLandlordModal" class="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 hidden">
+    <div class="bg-gray-800 text-white p-8 rounded-lg w-1/3 shadow-lg">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Add Landlord</h2>
+        <form method="POST" action="{{ url_for('main.landlords') }}">
+            <div class="mb-4">
+                <label for="name" class="block text-sm font-medium">Name</label>
+                <input type="text" name="name" id="name" class="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="email" class="block text-sm font-medium">Email</label>
+                <input type="email" name="email" id="email" class="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="password" class="block text-sm font-medium">Password</label>
+                <input type="text" name="password" id="password" class="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <button type="submit" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">Add Landlord</button>
+        </form>
+        <button id="closeAddLandlordModal" class="absolute top-0 right-0 p-2 text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">&times;</button>
+    </div>
+</div>
+
+<script>
+    // JavaScript for Modal Functionality
+    const addLandlordButton = document.getElementById("addLandlordButton");
+    const addLandlordModal = document.getElementById("addLandlordModal");
+    const closeModalButton = document.getElementById("closeAddLandlordModal");
+
+    // Show modal
+    addLandlordButton.addEventListener("click", () => {
+        addLandlordModal.classList.remove("hidden");
+    });
+
+    // Close modal
+    closeModalButton.addEventListener("click", () => {
+        addLandlordModal.classList.add("hidden");
+    });
+
+    // Close modal when clicking outside of it
+    window.addEventListener("click", (event) => {
+        if (event.target === addLandlordModal) {
+            addLandlordModal.classList.add("hidden");
+        }
+    });
+
+    function openEditLandlordModal(id, name, email) {
+        document.getElementById("edit_landlord_id").value = id;
+        document.getElementById("edit_name").value = name;
+        document.getElementById("edit_email").value = email;
+        document.getElementById("editLandlordModal").classList.remove("hidden");
+    }
+
+    document.getElementById("closeEditLandlordModal").addEventListener("click", () => {
+        document.getElementById("editLandlordModal").classList.add("hidden");
+    });
+</script>
+{% endblock %}

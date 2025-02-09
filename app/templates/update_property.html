@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-8">
+    <h1 class="text-3xl font-semibold text-white mb-4">Update Property</h1>
+
+    <form method="POST" action="{{ url_for('main.update_property', property_id=property.id) }}">
+        <div class="mb-4">
+            <label for="address" class="block text-sm font-medium">Address</label>
+            <input type="text" name="address" id="address" class="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded focus:ring-2 focus:ring-blue-500" value="{{ property.address }}" required>
+        </div>
+        <div class="mb-4">
+            <label for="unit_number" class="block text-sm font-medium">Unit Number</label>
+            <input type="text" name="unit_number" id="unit_number" class="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded focus:ring-2 focus:ring-blue-500" value="{{ property.unit_number }}" required>
+        </div>
+        <div class="mb-4">
+            <label for="rent_amount" class="block text-sm font-medium">Rent Amount</label>
+            <input type="text" name="rent_amount" id="rent_amount" class="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded focus:ring-2 focus:ring-blue-500" value="{{ property.rent_amount }}" required>
+        </div>
+        <div class="mb-4">
+            <label for="status" class="block text-sm font-medium">Status</label>
+            <select name="status" id="status" class="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded focus:ring-2 focus:ring-blue-500">
+                <option value="Available" {% if property.status == 'Available' %}selected{% endif %}>Available</option>
+                <option value="Occupied" {% if property.status == 'Occupied' %}selected{% endif %}>Occupied</option>
+            </select>
+        </div>
+        <button type="submit" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">Update Property</button>
+    </form>
+</div>
+{% endblock %}

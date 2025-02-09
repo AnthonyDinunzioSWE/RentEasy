@@ -27,6 +27,7 @@
                         <a href="{{ url_for('main.leases') }}">Leases</a>
                     {% elif session['user_role'] == 'Admin' %}
                         <a href="{{ url_for('main.dashboard') }}" class="hover:text-gray-400">Dashboard</a>
+                        <a href="{{ url_for('main.landlords') }}" class="hover:text-gray-400">Landlords</a>
                     {% endif %}
                     <a href="{{ url_for('main.logout') }}" class="hover:text-gray-400">Logout</a>
                 {% else %}
